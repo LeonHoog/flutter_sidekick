@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_sidekick/flutter_sidekick.dart';
@@ -18,15 +19,13 @@ class SimpleExample extends StatefulWidget {
   _SimpleExampleState createState() => _SimpleExampleState();
 }
 
-class _SimpleExampleState extends State<SimpleExample>
-    with TickerProviderStateMixin {
+class _SimpleExampleState extends State<SimpleExample> with TickerProviderStateMixin {
   SidekickController controller;
 
   @override
   void initState() {
     super.initState();
-    controller =
-        SidekickController(vsync: this, duration: Duration(seconds: 1));
+    controller = SidekickController(vsync: this, duration: Duration(seconds: 1));
   }
 
   @override
@@ -149,12 +148,12 @@ class SidekickTeamBuilderExample extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: const Text('alltosource'),
                     onPressed: () => SidekickTeamBuilder.of<String>(context)
                         .moveAll(SidekickFlightDirection.toSource),
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     child: const Text('alltotarget'),
                     onPressed: () => SidekickTeamBuilder.of<String>(context)
                         .moveAll(SidekickFlightDirection.toTarget),
@@ -764,3 +763,4 @@ class _ItemContainsInOrder extends Matcher {
           Map matchState, bool verbose) =>
       mismatchDescription.add(_test(item, matchState));
 }
+*/

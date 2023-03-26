@@ -8,9 +8,8 @@ class SimpleExample extends StatefulWidget {
   _SimpleExampleState createState() => _SimpleExampleState();
 }
 
-class _SimpleExampleState extends State<SimpleExample>
-    with TickerProviderStateMixin {
-  SidekickController controller;
+class _SimpleExampleState extends State<SimpleExample> with TickerProviderStateMixin {
+  late SidekickController controller;
 
   @override
   void initState() {

@@ -69,7 +69,7 @@ class HomeTile extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: Theme.of(context).primaryTextTheme.title.copyWith(
+              style: Theme.of(context).primaryTextTheme.titleLarge?.copyWith(
                   color: ThemeData.estimateBrightnessForColor(color) ==
                           Brightness.dark
                       ? Colors.white
@@ -84,9 +84,9 @@ class HomeTile extends StatelessWidget {
 
 class SimpleScaffold extends StatelessWidget {
   const SimpleScaffold({
-    Key key,
-    this.title,
-    this.child,
+    Key? key,
+    required this.title,
+    required this.child,
   }) : super(key: key);
 
   final String title;

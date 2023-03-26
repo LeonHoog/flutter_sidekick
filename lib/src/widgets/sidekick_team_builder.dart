@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_sidekick/src/widgets/sidekick.dart';
 
@@ -23,12 +25,12 @@ class _SidekickMission<T> {
   bool inFlightToTheTarget = false;
   bool get inFlight => inFlightToTheSource || inFlightToTheTarget;
 
-  void startFlight(SidekickFlightDirection direction) =>
+  void startFlight(SidekickFlightDirection? direction) =>
       _setInFlight(direction, true);
-  void endFlight(SidekickFlightDirection direction) =>
+  void endFlight(SidekickFlightDirection? direction) =>
       _setInFlight(direction, false);
 
-  void _setInFlight(SidekickFlightDirection direction, bool inFlight) {
+  void _setInFlight(SidekickFlightDirection? direction, bool inFlight) {
     if (direction == SidekickFlightDirection.toTarget) {
       inFlightToTheTarget = inFlight;
     } else {
@@ -37,7 +39,7 @@ class _SidekickMission<T> {
   }
 
   void dispose() {
-    controller?.dispose();
+    controller.dispose();
   }
 }
 
@@ -48,31 +50,30 @@ class _SidekickMission<T> {
 /// container (the source) to the other (the target) and vice-versa.
 class SidekickTeamBuilder<T> extends StatefulWidget {
   SidekickTeamBuilder({
-    Key key,
-    @required this.builder,
+    Key? key,
+    required this.builder,
     this.initialSourceList,
     this.initialTargetList,
     this.animationDuration = const Duration(milliseconds: 300),
-  })  : assert(animationDuration != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The builder used to create the containers.
   final SidekickTeamWidgetBuilder<T> builder;
 
   /// The initial items contained in the source container.
-  final List<T> initialSourceList;
+  final List<T>? initialSourceList;
 
   /// The initial items contained in the target container.
-  final List<T> initialTargetList;
+  final List<T>? initialTargetList;
 
   /// The duration of the flying animation.
   final Duration animationDuration;
 
   /// The state from the closest instance of this class that encloses the given context.
-  static SidekickTeamBuilderState<T> of<T>(BuildContext context) {
+  static SidekickTeamBuilderState<T>? of<T>(BuildContext context) {
     assert(context != null);
-    final SidekickTeamBuilderState<T> result =
-        context.ancestorStateOfType(TypeMatcher<SidekickTeamBuilderState<T>>());
+    final SidekickTeamBuilderState<T>? result =
+        context.findAncestorStateOfType<SidekickTeamBuilderState<T>>();
     return result;
   }
 
@@ -88,17 +89,17 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   static const String _sourceListPrefix = 's_';
   static const String _targetListPrefix = 't_';
   static int _nextId = 0;
-  int _id;
-  bool _allInFlight;
-  SidekickController _sidekickController;
-  List<_SidekickMission<T>> _sourceList;
-  List<_SidekickMission<T>> _targetList;
+  int? _id;
+  late bool _allInFlight;
+  late SidekickController _sidekickController;
+  List<_SidekickMission<T>>? _sourceList;
+  List<_SidekickMission<T>>? _targetList;
 
   /// The items contained in the container labeled as the 'source'.
-  List<T> get sourceList => _sourceList.map((item) => item.message).toList();
+  List<T> get sourceList => _sourceList!.map((item) => item.message).toList();
 
   /// The items contained in the container labeled as the 'target'.
-  List<T> get targetList => _targetList.map((item) => item.message).toList();
+  List<T> get targetList => _targetList!.map((item) => item.message).toList();
 
   @override
   void initState() {
@@ -115,18 +116,18 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   void _initLists() {
     _sourceList?.forEach((mission) => mission.dispose());
     _targetList?.forEach((mission) => mission.dispose());
-    _sourceList = List<_SidekickMission<T>>();
-    _targetList = List<_SidekickMission<T>>();
+    _sourceList = [];
+    _targetList = [];
     _initList(_sourceList, widget.initialSourceList, _sourceListPrefix);
     _initList(_targetList, widget.initialTargetList, _targetListPrefix);
   }
 
   void _initList(
-      List<_SidekickMission<T>> list, List<T> initialList, String prefix) {
+      List<_SidekickMission<T>>? list, List<T>? initialList, String prefix) {
     if (initialList != null) {
       for (var i = 0; i < initialList.length; i++) {
         final String id = '$prefix$i';
-        list.add(_SidekickMission(
+        list!.add(_SidekickMission(
           id,
           initialList[i],
           this,
@@ -142,23 +143,23 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   }
 
   /// Moves all the widgets from a container to the other, respecting the given [direction].
-  Future<void> moveAll(SidekickFlightDirection direction) {
+  Future<void> moveAll(SidekickFlightDirection? direction) {
     assert(direction != null);
     if (!_allInFlight) {
       _allInFlight = true;
-      final List<_SidekickMission> source = _getSource(direction);
-      final List<_SidekickMission> target = _getTarget(direction);
+      final List<_SidekickMission> source = _getSource(direction)!;
+      final List<_SidekickMission?>? target = _getTarget(direction);
 
       setState(() {
         source.forEach((mission) => mission.startFlight(direction));
-        target.addAll(source);
+        target!.addAll(source);
       });
 
       return _sidekickController
           .move(
         context,
-        direction,
-        tags: source.map((mission) => _getTag(mission)).toList(),
+        direction!,
+        tags: source.map((mission) => _getTag(mission as _SidekickMission<T?>)).toList(),
       )
           .then((_) {
         setState(() {
@@ -181,13 +182,13 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
   /// Moves the widget containing the specifed [message] from its position to its
   /// position in the other container.
   Future<void> move(T message) {
-    final _SidekickMission<T> sourceMission =
-        _getFirstMissionInList(_sourceList, message);
-    final _SidekickMission<T> targetMission =
-        _getFirstMissionInList(_targetList, message);
+    final _SidekickMission<T>? sourceMission =
+        _getFirstMissionInList(_sourceList!, message);
+    final _SidekickMission<T>? targetMission =
+        _getFirstMissionInList(_targetList!, message);
 
-    SidekickFlightDirection direction;
-    _SidekickMission<T> mission;
+    SidekickFlightDirection? direction;
+    _SidekickMission<T>? mission;
     if (sourceMission != null) {
       direction = SidekickFlightDirection.toTarget;
       mission = sourceMission;
@@ -198,19 +199,19 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
     assert(direction != null);
     assert(mission != null);
 
-    if (!mission.inFlight) {
+    if (!mission!.inFlight) {
       mission.startFlight(direction);
-      final List<_SidekickMission> source = _getSource(direction);
-      final List<_SidekickMission> target = _getTarget(direction);
+      final List<_SidekickMission>? source = _getSource(direction);
+      final List<_SidekickMission?>? target = _getTarget(direction);
 
       setState(() {
-        target.add(mission);
+        target!.add(mission);
       });
       return mission.controller
-          .move(context, direction, tags: [_getTag(mission)]).then((_) {
+          .move(context, direction!, tags: [_getTag(mission)]).then((_) {
         setState(() {
-          mission.endFlight(direction);
-          source.remove(mission);
+          mission!.endFlight(direction);
+          source!.remove(mission);
         });
       });
     } else {
@@ -218,22 +219,21 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
     }
   }
 
-  List<_SidekickMission<T>> _getSource(SidekickFlightDirection direction) {
+  List<_SidekickMission<T>>? _getSource(SidekickFlightDirection? direction) {
     return direction == SidekickFlightDirection.toTarget
         ? _sourceList
         : _targetList;
   }
 
-  List<_SidekickMission<T>> _getTarget(SidekickFlightDirection direction) {
+  List<_SidekickMission<T>?>? _getTarget(SidekickFlightDirection? direction) {
     return direction == SidekickFlightDirection.toTarget
         ? _targetList
         : _sourceList;
   }
 
-  _SidekickMission<T> _getFirstMissionInList(
+  _SidekickMission<T>? _getFirstMissionInList(
       List<_SidekickMission<T>> list, T message) {
-    return list.firstWhere((mission) => identical(mission.message, message),
-        orElse: () => null);
+    return list.firstWhereOrNull((mission) => identical(mission.message, message));
   }
 
   @override
@@ -242,14 +242,14 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
       builder: (context) {
         return widget.builder(
             context,
-            _sourceList
+            _sourceList!
                 .map((mission) => _buildSidekickBuilder(
                       context,
                       mission,
                       true,
                     ))
                 .toList(),
-            _targetList
+            _targetList!
                 .map((mission) => _buildSidekickBuilder(
                       context,
                       mission,
@@ -271,16 +271,16 @@ class SidekickTeamBuilderState<T> extends State<SidekickTeamBuilder<T>>
     );
   }
 
-  String _getTag(_SidekickMission<T> mission, {bool isSource = true}) {
+  String _getTag(_SidekickMission<T?> mission, {bool isSource = true}) {
     final String prefix = isSource ? 'source_' : 'target_';
     return '${_id}_$prefix${mission.id}';
   }
 
   @override
   void dispose() {
-    _sidekickController?.dispose();
-    _sourceList.forEach((mission) => mission.dispose());
-    _targetList.forEach((mission) => mission.dispose());
+    _sidekickController.dispose();
+    _sourceList!.forEach((mission) => mission.dispose());
+    _targetList!.forEach((mission) => mission.dispose());
     super.dispose();
   }
 }
@@ -300,7 +300,7 @@ class SidekickBuilderDelegate<T> {
 
   final _SidekickMission<T> _mission;
   final String _tag;
-  final String _targetTag;
+  final String? _targetTag;
   final bool _isSource;
 
   /// The message transferred by the [Sidekick].
@@ -310,10 +310,10 @@ class SidekickBuilderDelegate<T> {
   Widget build(
     BuildContext context,
     Widget child, {
-    CreateRectTween createRectTween,
-    SidekickFlightShuttleBuilder flightShuttleBuilder,
-    TransitionBuilder placeholderBuilder,
-    SidekickAnimationBuilder animationBuilder,
+    CreateRectTween? createRectTween,
+    SidekickFlightShuttleBuilder? flightShuttleBuilder,
+    TransitionBuilder? placeholderBuilder,
+    SidekickAnimationBuilder? animationBuilder,
   }) {
     return Opacity(
       opacity: _getOpacity(),

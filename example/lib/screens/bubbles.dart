@@ -99,8 +99,7 @@ class BubblesExample extends StatelessWidget {
                         // trigger a move.
                         // Here we will move all the children for the target container,
                         // to the source container.
-                        onPressed: () => SidekickTeamBuilder.of<String>(context)
-                            .moveAll(SidekickFlightDirection.toSource),
+                        onPressed: () => SidekickTeamBuilder.of<String>(context)!.moveAll(SidekickFlightDirection.toSource),
                       ),
                       SizedBox(width: 60.0, height: 60.0),
                       CircleButton(
@@ -109,8 +108,7 @@ class BubblesExample extends StatelessWidget {
                         // trigger a move.
                         // Here we will move all the children for the source container,
                         // to the target container.
-                        onPressed: () => SidekickTeamBuilder.of<String>(context)
-                            .moveAll(SidekickFlightDirection.toTarget),
+                        onPressed: () => SidekickTeamBuilder.of<String>(context)!.moveAll(SidekickFlightDirection.toTarget),
                       ),
                     ],
                   ),
@@ -185,8 +183,7 @@ class BubblesExample extends StatelessWidget {
         return Bubble(
           radius: Tween<double>(begin: 50.0, end: 30.0).evaluate(animation),
           fontSize: Tween<double>(begin: 20.0, end: 12.0).evaluate(animation),
-          backgroundColor: ColorTween(begin: Colors.green, end: Colors.blue)
-              .evaluate(animation),
+          backgroundColor: ColorTween(begin: Colors.green, end: Colors.blue).evaluate(animation)!,
           foregroundColor: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(2.0),
@@ -203,19 +200,19 @@ class BubblesExample extends StatelessWidget {
 
 class Bubble extends StatelessWidget {
   const Bubble({
-    Key key,
-    this.child,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.radius,
-    this.fontSize,
+    Key? key,
+    required this.child,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    required this.radius,
+    required this.fontSize,
   }) : super(key: key);
 
   final Widget child;
 
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
-  final Color foregroundColor;
+  final Color? foregroundColor;
 
   final double radius;
 
@@ -225,10 +222,10 @@ class Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle textStyle =
-        theme.primaryTextTheme.subhead.copyWith(color: foregroundColor);
-    Color effectiveBackgroundColor = backgroundColor;
+        theme.primaryTextTheme.titleMedium!.copyWith(color: foregroundColor);
+    Color? effectiveBackgroundColor = backgroundColor;
     if (effectiveBackgroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
+      switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         case Brightness.dark:
           effectiveBackgroundColor = theme.primaryColorLight;
           break;
@@ -237,7 +234,7 @@ class Bubble extends StatelessWidget {
           break;
       }
     } else if (foregroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+      switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
         case Brightness.dark:
           textStyle = textStyle.copyWith(color: theme.primaryColorLight);
           break;
